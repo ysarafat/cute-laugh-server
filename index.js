@@ -108,7 +108,32 @@ async function run() {
         });
       }
     });
-   
+     // All products
+     app.get('/api/products', async (req, res) =>{
+      try {
+        const result = await productCollection.find().toArray();
+
+        if (result) {
+          res.status(200).json({
+            success: true,
+            message: "Products retrieved successfully",
+            data: result,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "No products found",
+            data: [],
+          });
+        }
+      } catch (error) {
+     console.log(error)
+        res.status(500).json({
+          success: false,
+          message: "Something went wrong!",
+        });
+      }
+    });
     // Start the server
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
