@@ -110,8 +110,28 @@ async function run() {
     });
      // All products
      app.get('/api/products', async (req, res) =>{
+      const {category,minPrice, maxPrice, ratings} = req.query
       try {
-        const result = await productCollection.find().toArray();
+        // filter by category
+        let query = {};
+        if (category) {
+          query.category = category;
+        }
+
+        // filter by rating
+        if (ratings) {
+          query.ratings =  ratings ;
+        }
+        // filter by price range
+        if (minPrice && maxPrice) {
+          query.price = { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) };
+        } else if (minPrice) {
+          query.price = { $gte: parseFloat(minPrice) };
+        } else if (maxPrice) {
+          query.price = { $lte: parseFloat(maxPrice) };
+        }
+        
+        const result = await productCollection.find(query).toArray();
 
         if (result) {
           res.status(200).json({
@@ -134,6 +154,35 @@ async function run() {
         });
       }
     });
+     // single products
+     app.get('/api/product/:id', async (req, res) =>{
+      const {id} = req.params
+      console.log(id)
+      try {
+        const result = await productCollection.findOne({_id: new ObjectId(id)});
+
+        if (result) {
+          res.status(200).json({
+            success: true,
+            message: "Products retrieved successfully",
+            data: result,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "No products found",
+            data: [],
+          });
+        }
+      } catch (error) {
+     console.log(error)
+        res.status(500).json({
+          success: false,
+          message: "Something went wrong!",
+        });
+      }
+    });
+   
     // Start the server
     app.listen(port, () => {
       console.log(`Server is running on http://localhost:${port}`);
