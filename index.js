@@ -131,7 +131,7 @@ async function run() {
           query.price = { $lte: parseFloat(maxPrice) };
         }
         
-        const result = await productCollection.find(query).toArray();
+        const result = await productCollection.find(query).sort({ratings: -1}).toArray();
 
         if (result) {
           res.status(200).json({
